@@ -10,7 +10,6 @@ export default async (req, res) => {
         case 'GET':
             try {
                 const character = await Character.find({});
-
                 res.status(200).json({ success: true, data: character })
             } catch (error) {
                 res.status(400).json({ success: false });
@@ -18,11 +17,7 @@ export default async (req, res) => {
             break;
         case 'POST':
             try {
-                //console.log (req.body)
-                //console.log (Note)
                 const character = await Character.create(req.body);
-                //console.log("POST")
-
                 res.status(201).json({ success: true, data: character })
             } catch (error) {
                 res.status(400).json({ success: false });

@@ -3,12 +3,19 @@ import { useRouter } from 'next/router';
 import { Confirm, Button, Loader } from 'semantic-ui-react';
 import styles from '../../../styles/character.module.css'
 
-const Character = ({ character }) => {
+const Character = ({ character, favorite }) => {
     const {origin, location, episode, image, url, created} = character;
     const [confirm, setConfirm] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isFavorite, setIsFavorite] = useState(false);
     const router = useRouter();
+
+    if (favorite ===true || favorite ==="true") {
+        favorite = true;
+    } else {
+        favorite = false
+    }
+        
 
     const openDelete = () => {
         setConfirm(true);
@@ -107,13 +114,17 @@ const Character = ({ character }) => {
                         <p>created&nbsp;:&nbsp;&nbsp;{created}</p>                     
                     </div>
                     <Button color='red' onClick={openDelete}>Delete</Button>
-                    <Button color='green' onClick={openFavorite}>Favorite</Button>
+                    {favorite ? <Button color='green' onClick={openFavorite}>UnFavor</Button>
+                              : <Button color='green' onClick={openFavorite}>Favorite</Button>
+                    }
                 </>
             }
             <Confirm
                 open={confirm}
                 onCancel={close}
-                content = {isFavorite ? "do you want add this character to your favorite list ?" 
+                content = {isFavorite ? (favorite ? "do you want remove this character from your favorite list ?"
+                                                  : "do you want add this character to your favorite list"
+                                        ) 
                                       : "do you want delete this character permanently ?"}
                 onConfirm={isFavorite ? handleFavorite : handleDelete}
             />
@@ -121,10 +132,11 @@ const Character = ({ character }) => {
     )
 }
 
-export async function getServerSideProps({ query: { id } }) {
+export async function getServerSideProps({ query: { id, favorite} }) {
     const res = await fetch(`https://rickandmortyapi.com/api/character/${id}`)
     let character = await res.json();
-    return { props: {character} }    
+    console.log ("favorite = ", favorite)
+    return { props: {character, favorite} }    
 }
 
 export default Character;

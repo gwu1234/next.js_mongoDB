@@ -2,6 +2,7 @@ import styles from '../../styles/characters.module.css'
 import { Button, Card, Loader} from 'semantic-ui-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 
 const Characters = ({characters}) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -9,6 +10,8 @@ const Characters = ({characters}) => {
   useEffect(() => {
       setIsLoading(!isLoading);
   }, [characters])
+
+  const router = useRouter();
 
   return (
     <div className={styles.container}>
@@ -25,6 +28,7 @@ const Characters = ({characters}) => {
           <div className={styles.grid}>       
               {characters.map(ch => {
                 let header = ch.id + " : " + ch.name
+                let path = '/character/'+ ch.id;
                 return (
                   <div key={ch.id}>
                     <Card>
@@ -34,9 +38,10 @@ const Characters = ({characters}) => {
                         </Card.Header>
                       </Card.Content>
                       <Card.Content extra>
-                        <Link href={`/character/${ch.id}`}>
-                          <Button primary>View</Button>
-                        </Link>
+                         <Button primary onClick ={()=>router.push({
+                            pathname: path,
+                            query: { favorite: false }
+                           })}>View</Button>
                         <Link href={`/character/${ch.id}/edit`}>
                           <Button primary>Edit</Button>
                         </Link>
