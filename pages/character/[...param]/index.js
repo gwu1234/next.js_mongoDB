@@ -98,19 +98,32 @@ export async function getServerSideProps({params:{param}}) {
 
     const res = await fetch(queryString)
     let returnJson = await res.json();
-    
+
+    let characters = [];
     if (returnJson.error) {
-      let characters=[];
       return { props: {characters} }
     }
 
     let {info: {pages, next}, results} = returnJson
-    //console.log("pages = ", pages)
-    //console.log("next = ", next)
-    let characters = [];
-    //console.log (results)
     characters = characters.concat(results);
-    return { props: {characters} }
+
+    if (pages === 1 || next === null) {
+        return { props: {characters} }
+    } else {
+        return (async ()=> {
+            let count = 1
+            let nextPage = next
+            do {
+                  let res = await fetch(nextPage)
+                  let {info: {next}, results} = await res.json();
+                  count ++
+                  characters = characters.concat(results);
+                  nextPage = next
+            }
+            while (count <= pages && nextPage != null);
+            return { props: {characters} }
+        })(); 
+    }
 }
 
 export default FilteredCharacters;
