@@ -15,16 +15,16 @@ export default function Home() {
 
         <div className={styles.grid}>
           <a href="/filter" className={styles.card}>
-            <h3>Selecting Characters &rarr;</h3>
+            <h3>Select Characters &rarr;</h3>
             <p>Listing Filtered Rick and Morty Characters</p>
+          </a>
+          <a href="/favorite" className={styles.card}>
+            <h3>Favorite Characters  &rarr;</h3>
+            <p>Listing Favorite Rick and Morty Characters</p>
           </a>
           <a href="/character" className={styles.card}>
             <h3>All Characters &rarr;</h3>
             <p>Listing all Rick and Morty Characters</p>
-          </a>
-          <a href="/character" className={styles.card}>
-            <h3>Management &rarr;</h3>
-            <p>Managing Rick and Morty Characters</p>
           </a>
         </div>
       </main>
