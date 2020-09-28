@@ -1,0 +1,25 @@
+.container {
+    min-height: 100vh;
+    margin: auto;
+    width: 50%;
+    padding: 10px;
+  }
+
+.menu {
+    padding-top: 1em;
+    padding-left: 3rem;
+    padding-bottom: 1rem;
+    border: 1px solid #eaeaea;
+    border-radius: 10px;
+  }
+
+.menu p {
+    margin: 0 0 0 0;
+    font-size: 1.2rem;
+  }
+
+.menu a {
+    font-size: 1.1rem;
+    color: #0070f3;
+    text-decoration: none;
+}

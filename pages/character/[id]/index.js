@@ -1,0 +1,130 @@
+import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { Confirm, Button, Loader } from 'semantic-ui-react';
+import styles from '../../../styles/character.module.css'
+
+const Character = ({ character }) => {
+    const {origin, location, episode, image, url, created} = character;
+    const [confirm, setConfirm] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [isFavorite, setIsFavorite] = useState(false);
+    const router = useRouter();
+
+    const openDelete = () => {
+        setConfirm(true);
+        setIsDeleting(true);
+    }
+
+    const openFavorite = () => {
+        setConfirm(true);
+        setIsFavorite(true)
+    }
+
+    const close = () => setConfirm(false);
+
+    const deleteCharacter = async () => {
+        const noteId = router.query.id;
+        try {
+            const deleted = await fetch(`http://localhost:3000/api/notes/${noteId}`, {
+                method: "Delete"
+            });
+
+            router.push("/");
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    const createFavorite = async () => {
+        try {
+            const res = await fetch('http://localhost:3000/api/character', {
+                method: 'POST',
+                headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(character)
+            })
+            router.push("/character");
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handleDelete = async () => {
+        setIsDeleting(true);
+        eleteCharacter()
+        close();
+        setIsDeleting(false);
+    }
+
+    const handleFavorite = async () => {
+        setIsFavorite(true);
+        createFavorite();
+        close();
+        setIsFavorite(false);
+    }
+
+    return (
+        <div className={styles.container}>
+            {isDeleting
+                ? <Loader active />
+                :
+                <>
+                    <div className ={styles.menu}>
+                        <h3>name&nbsp;:&nbsp;&nbsp;{character.name}</h3>
+                        <p>id&nbsp;:&nbsp;&nbsp;{character.id}</p>
+                        <p>status&nbsp;:&nbsp;&nbsp;{character.status}</p>
+                        <p>species&nbsp;:&nbsp;&nbsp;{character.species}</p>
+                        <p>type&nbsp;:&nbsp;&nbsp;{character.type}</p>
+                        <p>gender&nbsp;:&nbsp;&nbsp;{character.gender}</p>                       
+                    </div>
+                    <div className ={styles.menu}>
+                        <h3>origin</h3>
+                        <p>name&nbsp;:&nbsp;&nbsp;{origin.name}</p>
+                        <p>url&nbsp;:&nbsp;&nbsp;{origin.url}</p>                     
+                    </div>
+                    <div className ={styles.menu}>
+                        <h3>location</h3>
+                        <p>name&nbsp;:&nbsp;&nbsp;{location.name}</p>
+                        <p>url&nbsp;:&nbsp;&nbsp;{location.url}</p>                     
+                    </div>
+                    <div className ={styles.menu}>
+                        <h3>image</h3>
+                        <img src={image} alt={character.name}></img>                    
+                    </div>
+                    <div className ={styles.menu}>
+                        <h3>episode</h3>
+                        {episode.map((ep, index) => {          
+                            return (
+                                <div key ={ep+index}>
+                                    <a href={ep}>{ep}</a>
+                                </div>
+                            )})}                     
+                    </div>
+                    <div className ={styles.menu}>
+                        <p>url&nbsp;:&nbsp;&nbsp;{url}</p>
+                        <p>created&nbsp;:&nbsp;&nbsp;{created}</p>                     
+                    </div>
+                    <Button color='red' onClick={openDelete}>Delete</Button>
+                    <Button color='green' onClick={openFavorite}>Favorite</Button>
+                </>
+            }
+            <Confirm
+                open={confirm}
+                onCancel={close}
+                content = {isFavorite ? "do you want add this character to your favorite list ?" 
+                                      : "do you want delete this character permanently ?"}
+                onConfirm={isFavorite ? handleFavorite : handleDelete}
+            />
+        </div>
+    )
+}
+
+export async function getServerSideProps({ query: { id } }) {
+    const res = await fetch(`https://rickandmortyapi.com/api/character/${id}`)
+    let character = await res.json();
+    return { props: {character} }    
+}
+
+export default Character;

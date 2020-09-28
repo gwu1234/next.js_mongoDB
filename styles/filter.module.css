@@ -1,0 +1,16 @@
+
+.container {
+    width: 400px;
+    margin: 20px auto;
+}
+
+.notecontainer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px;
+}
