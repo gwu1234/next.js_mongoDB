@@ -23,7 +23,7 @@ const Favorites = ({characters}) => {
         :
         <main className={styles.main}>
           <h3 className={styles.title}>
-              Character List 
+              Favorite List 
           </h3>
           <div className={styles.grid}>       
               {characters.map(ch => {

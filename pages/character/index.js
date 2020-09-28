@@ -23,7 +23,7 @@ const Characters = ({characters}) => {
         :
         <main className={styles.main}>
           <h3 className={styles.title}>
-              Character List 
+              All Character List 
           </h3>
           <div className={styles.grid}>       
               {characters.map(ch => {
