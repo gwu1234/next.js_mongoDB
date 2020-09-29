@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { Confirm, Button, Loader } from 'semantic-ui-react';
+import { Confirm, Button, Loader, Icon } from 'semantic-ui-react';
 import styles from '../../../styles/character.module.css'
 
-const Character = ({ character, favorite }) => {
+const Character = ({ character, favorite, comments }) => {
     const {origin, location, episode, image, url, created} = character;
     const [confirm, setConfirm] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -145,6 +145,33 @@ const Character = ({ character, favorite }) => {
                         <p>url&nbsp;:&nbsp;&nbsp;{url}</p>
                         <p>created&nbsp;:&nbsp;&nbsp;{created}</p>                     
                     </div>
+                    <div className ={styles.menu}>  
+                        <div className ={styles.icon}>  
+                            <div>               
+                                 <h3> Comments:</h3>
+                                 <p>  click + to add new comment</p>
+                            </div>
+                            <Icon name="plus" color="blue" size ="big" 
+                                  onClick = {()=>{
+                                      let path = `/character/${character.id}/newComment`;
+                                      router.push({
+                                        pathname: path,
+                                        query: { id: character.id ,
+                                                 name: character.name,
+                                                 commentString: JSON.stringify({comments})
+                                        }
+                                      })
+                                  }}>
+                            </Icon>
+                        </div>
+                        {comments.map((comment, index) => {          
+                            return (
+                                <div key ={comment.name+index}>
+                                    <p>{comment.id}</p>
+                                    <p>{comment.name}</p>
+                                </div>
+                            )})}                     
+                    </div>
                     <Button color='red' onClick={openDelete}>Delete</Button>
                     {favorite ? <Button color='green' onClick={unFavorite}>UnFavor</Button>
                               : <Button color='green' onClick={openFavorite}>Favorite</Button>
@@ -168,7 +195,8 @@ export async function getServerSideProps({ query: { id, favorite} }) {
     const res = await fetch(`https://rickandmortyapi.com/api/character/${id}`)
     let character = await res.json();
     console.log ("favorite = ", favorite)
-    return { props: {character, favorite} }    
+    let comments =[]
+    return { props: {character, favorite, comments} }    
 }
 
 export default Character;

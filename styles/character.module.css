@@ -23,3 +23,20 @@
     color: #0070f3;
     text-decoration: none;
 }
+
+.icon  {
+   display: flex;
+   flex-direction: horizontal;
+   justify-content: space-between;
+}
+
+.icon  * {
+   margin: 0rem
+}
+
+.icon p {
+   font-size: 0.9rem;
+   color: blue;
+   font-weight: bold;
+}
+
