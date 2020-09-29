@@ -32,15 +32,26 @@ const Character = ({ character, favorite }) => {
     const close = () => setConfirm(false);
 
     const deleteCharacter = async () => {
-        const noteId = router.query.id;
         try {
-            const deleted = await fetch(`http://localhost:3000/api/notes/${noteId}`, {
-                method: "Delete"
+            const deleted = await fetch(`http://localhost:3000/api/character/${character.id}`, {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(character)
             });
 
-            router.push("/");
+            if (!favorite) {
+                 router.push("/character");
+            }
+
         } catch (error) {
             console.log(error)
+        }
+
+        if (favorite) {
+            removeFavorite()
         }
     }
 
