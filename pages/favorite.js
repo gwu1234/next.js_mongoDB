@@ -42,10 +42,6 @@ const Favorites = ({characters}) => {
                             pathname: path,
                             query: { favorite: true }
                          })}>View</Button>
-                        
-                        <Link href={`/character/${ch.id}/edit`}>
-                          <Button primary>Edit</Button>
-                        </Link>
                       </Card.Content>
                     </Card>
                   </div>

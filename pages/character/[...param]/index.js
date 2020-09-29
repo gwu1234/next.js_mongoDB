@@ -3,6 +3,7 @@ import { Button, Card, Loader} from 'semantic-ui-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import isFavorite from '../../../utils/isFavorites';
 
 const FilteredCharacters = ({characters}) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -32,6 +33,7 @@ const FilteredCharacters = ({characters}) => {
               {dataExist && characters.map(ch => {
                 let header = ch.id + " : " + ch.name
                 let path = '/character/'+ ch.id;
+                let isFavorite = ch.isFavorite === true || ch.isFavorite === "true"
                 return (
                   <div key={ch.id}>
                     <Card>
@@ -43,11 +45,9 @@ const FilteredCharacters = ({characters}) => {
                       <Card.Content extra>
                         <Button primary onClick ={()=>router.push({
                             pathname: path,
-                            query: { favorite: false }
+                            query: { favorite: isFavorite}
                          })}>View</Button>
-                        <Link href={`/character/${ch.id}/edit`}>
-                          <Button primary>Edit</Button>
-                        </Link>
+                        {isFavorite  && <Icon name='favorite' color="red" size="large"></Icon>}
                       </Card.Content>
                     </Card>
                   </div>
@@ -110,20 +110,36 @@ export async function getServerSideProps({params:{param}}) {
     if (pages === 1 || next === null) {
         return { props: {characters} }
     } else {
-        return (async ()=> {
-            let count = 1
-            let nextPage = next
-            do {
-                  let res = await fetch(nextPage)
-                  let {info: {next}, results} = await res.json();
-                  count ++
-                  characters = characters.concat(results);
-                  nextPage = next
-            }
-            while (count <= pages && nextPage != null);
-            return { props: {characters} }
-        })(); 
+        const getRemaining = async ()=> {
+          let count = 1
+          let nextPage = next
+          do {
+                let res = await fetch(nextPage)
+                let {info: {next}, results} = await res.json();
+                count ++
+                characters = characters.concat(results);
+                nextPage = next
+          }
+          while (count <= pages && nextPage != null);
+      }
+
+      await getRemaining();
     }
+    const res_favorite = await fetch(`http://localhost:3000/api/character`)
+    let {success, data} = await res_favorite.json();
+    let favorites = [];
+    if (success === "true" || success === true) {
+        favorites = favorites.concat(data);
+    } 
+    
+    for (var ch of characters) {
+        if (isFavorite (ch, favorites)){
+            //console.log (ch.id)
+            ch.isFavorite = true;
+        }
+    }
+
+    return { props: {characters} }
 }
 
 export default FilteredCharacters;
