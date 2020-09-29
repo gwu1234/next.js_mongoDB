@@ -6,20 +6,20 @@ import styles from '../../../styles/comment.module.css'
 
 
 const NewComment = ({ }) => {
-    const [form, setForm] = useState({ title: '', description: '' });
+    const [form, setForm] = useState({ commenterId: '', commenterName: '', feedback: ""});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
     const router = useRouter();
     const {query : {id, name, commentString}} = router;
     console.log(id);
     console.log(name);
-    let comments = JSON.parse(commentString);
-    console.log(comments);
+    let {comments: previous} = JSON.parse(commentString);
+    //console.log(previousComments);
 
     useEffect(() => {
         if (isSubmitting) {
             if (Object.keys(errors).length === 0) {
-                createNote();
+                createComment();
             }
             else {
                 setIsSubmitting(false);
@@ -28,19 +28,42 @@ const NewComment = ({ }) => {
     }, [errors])
 
     const createComment = async () => {
+        
+        let { commenterId, commenterName, feedback} = form;  
+        const thisComment = {
+            by: {  
+                id: commenterId,
+                name: commenterName    
+            },
+            created: "2020-09-29",
+            comment: feedback
+        }
+
+        let combo = previous.concat([thisComment])
+        
+        let comments = {
+            id: id,
+            name: name,
+            comments: combo
+        }
+
+        console.log (comments)
+        setIsSubmitting(false)
+
         try {
-            const res = await fetch('http://localhost:3000/api/notes', {
+            const res = await fetch(`http://localhost:3000/api/character/${id}/comment`, {
                 method: 'POST',
                 headers: {
                     "Accept": "application/json",
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(form)
+                body: JSON.stringify(comments)
             })
             router.push("/");
+
         } catch (error) {
             console.log(error);
-        }
+        } 
     }
 
     const handleSubmit = (e) => {
@@ -60,11 +83,14 @@ const NewComment = ({ }) => {
     const validate = () => {
         let err = {};
 
-        if (!form.title) {
-            err.title = 'Title is required';
+        if (!form.commenterId) {
+            err.commenterId = 'Commenter Id  is required';
         }
-        if (!form.description) {
-            err.description = 'Description is required';
+        if (!form.commenterName) {
+            err.commenterName = 'Commenter Name required';
+        }
+        if (!form.feedback) {
+            err.feedback = 'Comment required';
         }
 
         return err;
@@ -72,26 +98,45 @@ const NewComment = ({ }) => {
 
     return (
         <div className={styles.container}>
-            <h3>Create New Comment</h3>
+            <h2>Create New Comment</h2>
             <div>
                 {
                     isSubmitting
                         ? <Loader active inline='centered' />
                         : <Form onSubmit={handleSubmit}>
-                            <Form.Input
-                                
-                                error={errors.title ? { content: 'Please enter a title', pointing: 'below' } : null}
-                                label='Title'
-                                placeholder='Title'
-                                name='title'
+                            <h4>Character Identification:</h4>
+                            <Form.Input 
+                                label='Character Id'
+                                placeholder='character id'
+                                name='id'
+                                value ={id}
+                            />
+                            <Form.Input        
+                                label='Character Name'
+                                placeholder='character name'
+                                name='name'
+                                value ={name}
+                            />
+                            <h4>Commented By:</h4>
+                            <Form.Input 
+                                label='Commenter Id'
+                                placeholder='commenter id'
+                                name='commenterId'
+                                error={errors.commenterId ? { content: 'Please enter id of commenter', pointing: 'below' } : null}
                                 onChange={handleChange}
                             />
-                            <Form.TextArea
-                                
-                                label='Descriprtion'
-                                placeholder='Description'
-                                name='description'
-                                error={errors.description ? { content: 'Please enter a description', pointing: 'below' } : null}
+                            <Form.Input        
+                                label='Commenter Name'
+                                placeholder='commenter name'
+                                name='commenterName'
+                                error={errors.commenterName ? { content: 'Please enter name of commenter', pointing: 'below' } : null}
+                                onChange={handleChange}
+                            />
+                            <Form.TextArea                               
+                                label='comment'
+                                placeholder='comment'
+                                name='feedback'
+                                error={errors.feedback ? { content: 'Please enter a comment', pointing: 'below' } : null}
                                 onChange={handleChange}
                             />
                             <Button type='submit'>Create</Button>

@@ -22,6 +22,16 @@ export default async (req, res) => {
                 res.status(400).json({ success: false });
             }
             break;
+        case 'POST':
+            console.log("at api/[id].comment.js POST")
+            console.log(req.body)
+            try {
+                const comment = await Comment.create(req.body);
+                res.status(201).json({ success: true, data: comment })
+            } catch (error) {
+                res.status(400).json({ success: false });
+            }
+            break;
         case 'PUT':
             try {
                 const comment = await Comment.findByIdAndUpdate(id, req.body, {
