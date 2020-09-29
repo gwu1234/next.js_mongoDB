@@ -7,7 +7,6 @@ const Character = ({ character, favorite }) => {
     const {origin, location, episode, image, url, created} = character;
     const [confirm, setConfirm] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
-    const [isFavorite, setIsFavorite] = useState(false);
     const router = useRouter();
 
     if (favorite ===true || favorite ==="true") {
@@ -24,7 +23,10 @@ const Character = ({ character, favorite }) => {
 
     const openFavorite = () => {
         setConfirm(true);
-        setIsFavorite(true)
+    }
+
+    const unFavorite = () => {
+        setConfirm(true);
     }
 
     const close = () => setConfirm(false);
@@ -52,7 +54,23 @@ const Character = ({ character, favorite }) => {
                 },
                 body: JSON.stringify(character)
             })
-            router.push("/character");
+            router.push("/favorite");
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const removeFavorite = async () => {
+        try {
+            const res = await fetch('http://localhost:3000/api/character', {
+                method: 'DELETE',
+                headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(character)
+            })
+            router.push("/favorite");
         } catch (error) {
             console.log(error);
         }
@@ -60,16 +78,19 @@ const Character = ({ character, favorite }) => {
 
     const handleDelete = async () => {
         setIsDeleting(true);
-        eleteCharacter()
+        deleteCharacter()
         close();
         setIsDeleting(false);
     }
 
     const handleFavorite = async () => {
-        setIsFavorite(true);
-        createFavorite();
-        close();
-        setIsFavorite(false);
+        if (favorite) { 
+            removeFavorite();
+            close();
+        } else {
+            createFavorite();
+            close();
+        }
     }
 
     return (
@@ -114,7 +135,7 @@ const Character = ({ character, favorite }) => {
                         <p>created&nbsp;:&nbsp;&nbsp;{created}</p>                     
                     </div>
                     <Button color='red' onClick={openDelete}>Delete</Button>
-                    {favorite ? <Button color='green' onClick={openFavorite}>UnFavor</Button>
+                    {favorite ? <Button color='green' onClick={unFavorite}>UnFavor</Button>
                               : <Button color='green' onClick={openFavorite}>Favorite</Button>
                     }
                 </>
@@ -122,11 +143,11 @@ const Character = ({ character, favorite }) => {
             <Confirm
                 open={confirm}
                 onCancel={close}
-                content = {isFavorite ? (favorite ? "do you want remove this character from your favorite list ?"
-                                                  : "do you want add this character to your favorite list"
-                                        ) 
-                                      : "do you want delete this character permanently ?"}
-                onConfirm={isFavorite ? handleFavorite : handleDelete}
+                content = {isDeleting ? "do you want delete this character permanently ?" :
+                            (favorite ? "do you want remove this character from your favorite list ?"
+                                      : "do you want add this character to your favorite list"
+                            )}
+                onConfirm={isDeleting? handleDelete: handleFavorite}
             />
         </div>
     )
