@@ -9,6 +9,8 @@ const Character = ({ character, favorite, comment }) => {
     const [confirm, setConfirm] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const router = useRouter();
+    console.log("comment =")
+    console.log(comment)
 
     if (favorite ===true || favorite ==="true") {
         favorite = true;
@@ -16,7 +18,6 @@ const Character = ({ character, favorite, comment }) => {
         favorite = false
     }
         
-
     const openDelete = () => {
         setConfirm(true);
         setIsDeleting(true);
@@ -159,21 +160,22 @@ const Character = ({ character, favorite, comment }) => {
                                         pathname: path,
                                         query: { id: character.id ,
                                                  name: character.name,
-                                                 commentString: JSON.stringify({comments})
+                                                 _id: comment ? comment._id: undefined,
+                                                 commentString: JSON.stringify({comment})
                                         }
                                       })
                                   }}>
                             </Icon>
                         </div>
-                        <div >
-                            <p>{comment.id}</p>
-                            <p>{comment.name}</p>
-                            {comment.comments.map((c, index)=>{ 
+                        <div className ={styles.comments}>
+                            {comment && <p>Character Id : &nbsp; &nbsp; {comment.id}</p>}
+                            {comment && <p>Character Name: &nbsp; &nbsp; {comment.name}</p>}
+                            {comment  && comment.comments.length > 0  && comment.comments.map((c, index)=>{ 
                                 return (
-                                    <div key={index}>
-                                        <p>{c.by.id}</p>
-                                        <p>{c.by.name}</p>
-                                        <p>{c.comment}</p>
+                                    <div className={styles.comment} key={index}>
+                                        <p>commented by : </p>
+                                        <p>id : &nbsp; {c.by.id} &nbsp; &nbsp;&nbsp; &nbsp;name : &nbsp; {c.by.name}</p>
+                                        <div className={styles.content}>{c.comment}</div>
                                     </div>
                                 )})}
                         </div>                                        
@@ -205,10 +207,10 @@ export async function getServerSideProps({ query: { id, favorite} }) {
     
     const res_comment = await fetch(`http://localhost:3000/api/character/${id}/comment`)
     let {success, data : comments} = await res_comment.json();
-    let comment = {}
+    let comment = null
     if (success === "true" || success === true) {
          comment = findCommentById(id, comments)
-         console.log (comment._id)
+         console.log (comment)
     } 
 
     return { props: {character, favorite, comment} }    

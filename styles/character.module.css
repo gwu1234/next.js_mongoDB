@@ -40,3 +40,27 @@
    font-weight: bold;
 }
 
+.comments {
+  margin: 0.5rem 0rem 1.0rem 0rem;
+}
+.comments p {
+  font-size: 1.0rem;
+  font-weight: bold;
+  font-style: italic 
+}
+
+.comment {
+  margin: 0.5rem 0rem 0rem 0rem;
+}
+.comment p {
+  font-size: 1.0rem;
+  font-weight: bold;
+  font-style: italic 
+}
+
+.content {
+  margin: 0.5rem 0rem 0rem 0rem;
+  font-size: 1.1rem;
+}
+
+

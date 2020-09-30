@@ -10,11 +10,13 @@ const NewComment = ({ }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
     const router = useRouter();
-    const {query : {id, name, commentString}} = router;
-    console.log(id);
-    console.log(name);
-    let {comments: previous} = JSON.parse(commentString);
-    //console.log(previousComments);
+    const {query : {id, name, _id, commentString}} = router;
+    //console.log(id); // character id 
+    //console.log(name);
+    //console.log(_id) // mongoDB object id 
+    let {comment: previous} = JSON.parse(commentString);
+    //console.log ("previous =")
+    //console.log(previous);
 
     useEffect(() => {
         if (isSubmitting) {
@@ -39,7 +41,17 @@ const NewComment = ({ }) => {
             comment: feedback
         }
 
-        let combo = previous.concat([thisComment])
+        let combo =[]
+        let method = "POST";
+        let comment_id = id // first comment, no mongoDB object id, use character id 
+        if (previous && Object.keys(previous).length > 0 ) {
+            method = "PUT"
+            comment_id = _id // use mongoDB object id for PUT updating 
+            combo.push(thisComment)
+            combo = combo.concat(previous.comments)
+        } else {
+            combo.push (thisComment)
+        }
         
         let comments = {
             id: id,
@@ -50,13 +62,8 @@ const NewComment = ({ }) => {
         console.log (comments)
         setIsSubmitting(false)
 
-        let method = "POST";
-        if (previous.length > 0) {
-             //let method = "PUT"
-             method = "PUT"
-        }
         try {
-            const res = await fetch(`http://localhost:3000/api/character/${id}/comment`, {
+            const res = await fetch(`http://localhost:3000/api/character/${comment_id}/comment`, {
                 method: method,
                 headers: {
                     "Accept": "application/json",

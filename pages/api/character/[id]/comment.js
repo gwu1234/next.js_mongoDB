@@ -5,13 +5,13 @@ mongoConnect();
 
 export default async (req, res) => {
     const {
-        query: { _id, id },
+        query: { id },
         method
     } = req;
 
     console.log ("id at api = ", id);
     console.log ("method = ", method);
-    console.log ("_id = ", _id);
+    //console.log ("_id = ", _id);
 
     switch (method) {
         case 'GET':
@@ -45,9 +45,12 @@ export default async (req, res) => {
         case 'PUT':
             try {
                 console.log("at api/[id].comment.js PUT")
-                const comment = await Comment.findByIdAndUpdate(_id, req.body, {
+                //let body = JSON.parse(req.body)
+                //_id  = body._id
+                console.log("id = ", id)
+                const comment = await Comment.findByIdAndUpdate(id, req.body, {
                     new: true,
-                    runValidators: true,
+                    runValidators: false,
                     useFindAndModify: false
                 });
 
