@@ -1,32 +1,32 @@
 This is a demo of a full stack application based on [Next.js] framework
 
-## Getting Started
+##Getting Started
 
 First, run the development server:
 
 npm run dev
-# or
+#or
 yarn dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to run application
 
 
-## technologies
+##technologies
 
 framework:
 
-- [Next.js] (https://nextjs.org/docs) 
+-[Next.js] (https://nextjs.org/docs) 
 
-- [mongoDB] collection and document based database without sql 
+-[mongoDB] collection and document based database without sql 
 
-## Data storage
+##Data storage
 
-- [RickMartin api] (https://rickandmortyapi.com/api/character)
+-[RickMartin api] (https://rickandmortyapi.com/api/character)
 
-- [mongoDB cloud databse]
+-[mongoDB cloud databse]
 
-## features of this application:
+##features of this application:
 
 1) fetch data from api 
 
