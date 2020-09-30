@@ -5,20 +5,28 @@ mongoConnect();
 
 export default async (req, res) => {
     const {
-        query: { id },
+        query: { _id, id },
         method
     } = req;
+
+    console.log ("id at api = ", id);
+    console.log ("method = ", method);
+    console.log ("_id = ", _id);
 
     switch (method) {
         case 'GET':
             try {
-                const comment = await Comment.findById(id);
+                console.log("at api/[id].comment.js GET")
+                //const comment = await Comment.findById({id: parseInt(id)});
+                const comment = await Comment.find();
                 if (!comment) {
+                    console.log("not found")
                     return res.status(400).json({ success: false });
                 }
-
+                //console.log(comment)
                 res.status(200).json({ success: true, data: comment });
             } catch (error) {
+                console.log(error)
                 res.status(400).json({ success: false });
             }
             break;
@@ -27,16 +35,20 @@ export default async (req, res) => {
             console.log(req.body)
             try {
                 const comment = await Comment.create(req.body);
+                console.log (comment)
                 res.status(201).json({ success: true, data: comment })
             } catch (error) {
+                console.log (error)
                 res.status(400).json({ success: false });
             }
             break;
         case 'PUT':
             try {
-                const comment = await Comment.findByIdAndUpdate(id, req.body, {
+                console.log("at api/[id].comment.js PUT")
+                const comment = await Comment.findByIdAndUpdate(_id, req.body, {
                     new: true,
-                    runValidators: true
+                    runValidators: true,
+                    useFindAndModify: false
                 });
 
                 if (!comment) {
@@ -45,6 +57,7 @@ export default async (req, res) => {
 
                 res.status(200).json({ success: true, data: comment });
             } catch (error) {
+                console.log (error)
                 res.status(400).json({ success: false });
             }
             break;

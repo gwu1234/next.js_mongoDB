@@ -1,6 +1,5 @@
 import styles from '../../styles/characters.module.css'
 import { Button, Card, Loader, Icon} from 'semantic-ui-react';
-//import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import isFavorite from '../../utils/isFavorites';
@@ -63,8 +62,6 @@ const Characters = ({characters}) => {
 export async function getServerSideProps() {
     const res = await fetch(`https://rickandmortyapi.com/api/character`)
     let {info: {pages, next}, results} = await res.json();
-    //console.log("pages = ", pages)
-    //console.log("next = ", next)
     let characters = [];
     characters = characters.concat(results);
 
@@ -84,16 +81,12 @@ export async function getServerSideProps() {
             while (count <= pages && nextPage != null);
         } 
         await getRemaining();
-        //return { props: {characters} }
     }
 
     { // block variable
       const res_favorite = await fetch(`http://localhost:3000/api/character`)
       let {success, data : favorites} = await res_favorite.json();
-      //let favorites = [];
       if (success === "true" || success === true) {
-          //favorites = favorites.concat(data);
-          
           for (var ch of characters) {
             if (isFavorite (ch, favorites)){
                 ch.isFavorite = true;
@@ -105,10 +98,7 @@ export async function getServerSideProps() {
     { // block variable, and character/1 is for routing purpose, 1 is not an character id here 
       const res_deleted = await fetch(`http://localhost:3000/api/character/1`)
       let {success, data : deleteds} = await res_deleted.json();
-      //let deleteds = [];
       if (success === "true" || success === true) {
-          //favorites = favorites.concat(data);
-          
           for (var ch of characters) {
             if (isDeleted (ch, deleteds)){
                 ch.isDeleted = true;
@@ -116,7 +106,6 @@ export async function getServerSideProps() {
           }
       }
    } 
-
     return { props: {characters} }
 }
 

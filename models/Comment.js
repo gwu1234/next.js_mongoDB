@@ -16,7 +16,7 @@ const CommentSchema = new mongoose.Schema({
             id: {
                 type: Number,
                 required: [true, 'id required'],
-                unique: true
+                unique: false
               },
             name: {
                 type: String,

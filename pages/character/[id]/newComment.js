@@ -50,9 +50,14 @@ const NewComment = ({ }) => {
         console.log (comments)
         setIsSubmitting(false)
 
+        let method = "POST";
+        if (previous.length > 0) {
+             //let method = "PUT"
+             method = "PUT"
+        }
         try {
             const res = await fetch(`http://localhost:3000/api/character/${id}/comment`, {
-                method: 'POST',
+                method: method,
                 headers: {
                     "Accept": "application/json",
                     "Content-Type": "application/json"
