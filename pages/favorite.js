@@ -1,6 +1,6 @@
 import styles from '../styles/characters.module.css'
 import { Button, Card, Loader} from 'semantic-ui-react';
-import Link from 'next/link';
+//import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
@@ -57,11 +57,11 @@ const Favorites = ({characters}) => {
 export async function getServerSideProps() {
     const res = await fetch(`http://localhost:3000/api/character`)
     let {success, data} = await res.json();
-    let characters = [];
+    
     if (success === "true" || success === true) {
-        characters = characters.concat(data);
+        return { props: {characters: data} }
     } 
-    return { props: {characters} }
+    return { props: {characters: []} }
 }
 
 export default Favorites;

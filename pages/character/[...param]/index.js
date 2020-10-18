@@ -1,9 +1,7 @@
 import styles from '../../../styles/characters.module.css'
 import { Button, Card, Loader} from 'semantic-ui-react';
-import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import isFavorite from '../../../utils/isFavorites';
 
 const FilteredCharacters = ({characters}) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -133,10 +131,7 @@ export async function getServerSideProps({params:{param}}) {
     } 
     
     for (var ch of characters) {
-        if (isFavorite (ch, favorites)){
-            //console.log (ch.id)
-            ch.isFavorite = true;
-        }
+        ch.isFavorite = favorites.some(favorite => favorite.id === ch.id)
     }
 
     return { props: {characters} }

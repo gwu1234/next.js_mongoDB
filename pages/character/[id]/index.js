@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Confirm, Button, Loader, Icon } from 'semantic-ui-react';
 import styles from '../../../styles/character.module.css'
-import findCommentById from "../../../utils/findCommentById"
 
 const Character = ({ character, favorite, comment }) => {
     const {origin, location, episode, image, url, created} = character;
@@ -202,14 +201,12 @@ const Character = ({ character, favorite, comment }) => {
 export async function getServerSideProps({ query: { id, favorite} }) {
     const res = await fetch(`https://rickandmortyapi.com/api/character/${id}`)
     let character = await res.json();
-    console.log ("favorite = ", favorite)
-    console.log ("id = ", id)
     
     const res_comment = await fetch(`http://localhost:3000/api/character/${id}/comment`)
     let {success, data : comments} = await res_comment.json();
     let comment = null
     if (success === "true" || success === true) {
-         comment = findCommentById(id, comments)
+         comment = comments.filter(com => com.id===parseInt(id))[0]
          console.log (comment)
     } 
 

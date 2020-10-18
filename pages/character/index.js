@@ -2,8 +2,6 @@ import styles from '../../styles/characters.module.css'
 import { Button, Card, Loader, Icon} from 'semantic-ui-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import isFavorite from '../../utils/isFavorites';
-import isDeleted from '../../utils/isDeleted';
 
 const Characters = ({characters}) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -88,9 +86,7 @@ export async function getServerSideProps() {
       let {success, data : favorites} = await res_favorite.json();
       if (success === "true" || success === true) {
           for (var ch of characters) {
-            if (isFavorite (ch, favorites)){
-                ch.isFavorite = true;
-            }
+              ch.isFavorite = favorites.some(favorite => favorite.id===ch.id)
           }
       } 
     }
@@ -100,9 +96,7 @@ export async function getServerSideProps() {
       let {success, data : deleteds} = await res_deleted.json();
       if (success === "true" || success === true) {
           for (var ch of characters) {
-            if (isDeleted (ch, deleteds)){
-                ch.isDeleted = true;
-            }
+             ch.isDeleted = deleteds.some(deleted => deleted.id===ch.id)
           }
       }
    } 
