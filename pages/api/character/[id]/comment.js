@@ -9,18 +9,19 @@ export default async (req, res) => {
         method
     } = req;
 
-    console.log ("id at api = ", id);
-    console.log ("method = ", method);
+    //console.log ("id at api = ", id);
+    //console.log ("method = ", method);
     
     switch (method) {
         case 'GET':
             try {
-                console.log("at api/[id].comment.js GET")
+                //console.log("at api/[id].comment.js GET")
                 const comment = await Comment.find();
                 if (!comment) {
-                    console.log("not found")
+                    //console.log("not found")
                     return res.status(400).json({ success: false });
                 }
+                //console.log(comment)
                 res.status(200).json({ success: true, data: comment });
             } catch (error) {
                 console.log(error)
@@ -29,10 +30,10 @@ export default async (req, res) => {
             break;
         case 'POST':
             console.log("at api/[id].comment.js POST")
-            console.log(req.body)
+            //console.log(req.body)
             try {
                 const comment = await Comment.create(req.body);
-                console.log (comment)
+                //console.log (comment)
                 res.status(201).json({ success: true, data: comment })
             } catch (error) {
                 console.log (error)

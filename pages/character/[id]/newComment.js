@@ -45,11 +45,13 @@ const NewComment = ({ }) => {
         let method = "POST";
         let comment_id = id // first comment, no mongoDB object id, use character id 
         if (previous && Object.keys(previous).length > 0 ) {
+            console.log("newComments.js add comments")
             method = "PUT"
             comment_id = _id // use mongoDB object id for PUT updating 
             combo.push(thisComment)
             combo = combo.concat(previous.comments)
         } else {
+            console.log("newCommens.js add first comment")
             combo.push (thisComment)
         }
         
