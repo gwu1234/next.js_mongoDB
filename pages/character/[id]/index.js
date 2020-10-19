@@ -206,7 +206,7 @@ export async function getServerSideProps({ query: { id, favorite} }) {
     let {success, data : comments} = await res_comment.json();
     let comment = null
     if (success === "true" || success === true) {
-         comment = comments.filter(com => com.id===parseInt(id))[0]
+         comment = comments.filter(com => com.id===parseInt(id))[0] | null
          console.log (comment)
     } 
 
