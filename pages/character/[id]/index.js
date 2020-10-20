@@ -8,8 +8,6 @@ const Character = ({ character, favorite, comment }) => {
     const [confirm, setConfirm] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const router = useRouter();
-    console.log("comment =")
-    console.log(comment)
 
     if (favorite ===true || favorite ==="true") {
         favorite = true;

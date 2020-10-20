@@ -15,7 +15,7 @@ export default async (req, res) => {
                 res.status(400).json({ success: false });
             }
             break;
-        case 'POST':
+        case 'POST': 
             try {
                 const character = await Character.create(req.body);
                 res.status(201).json({ success: true, data: character })

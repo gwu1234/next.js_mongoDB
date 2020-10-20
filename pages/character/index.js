@@ -2,6 +2,9 @@ import styles from '../../styles/characters.module.css'
 import { Button, Card, Loader, Icon} from 'semantic-ui-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import isDataInMongo from "../../utils/isDataInMongo"
+import cacheDataInMongo from "../../utils/cacheDataInMongo"
+import fetchDataFromMongo from "../../utils/fetchDataFromMongo"
 
 const Characters = ({characters}) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -26,6 +29,7 @@ const Characters = ({characters}) => {
           </h3>
           <div className={styles.grid}>       
               {characters.map(ch => {
+                ch = JSON.parse(ch)
                 let header = ch.id + " : " + ch.name
                 let path = '/character/'+ ch.id;
                 let isFavorite = ch.isFavorite === true || ch.isFavorite === "true"
@@ -58,37 +62,52 @@ const Characters = ({characters}) => {
 }
 
 export async function getServerSideProps() {
-    const res = await fetch(`https://rickandmortyapi.com/api/character`)
-    let {info: {pages, next}, results} = await res.json();
+    let mongoData = await isDataInMongo()
+    //console.log("mongoData", mongoData)
     let characters = [];
-    characters = characters.concat(results);
+    if (!mongoData) {
+        console.log ("no valid data in mongo DB")
+        const res = await fetch(`https://rickandmortyapi.com/api/character`)
+        let {info: {pages, next}, results} = await res.json();
+        characters = characters.concat(results);
 
-    if (pages === 1 || next === null) {
-        return { props: {characters} }
+        if (pages === 1 || next === null) {
+            return { props: {characters} }
+        } else {
+            const getRemaining = async ()=> {
+                let count = 1
+                let nextPage = next
+                do {
+                      let res = await fetch(nextPage)
+                      let {info: {next}, results} = await res.json();
+                      count ++
+                      characters = characters.concat(results);
+                      nextPage = next
+                }
+                while (count <= pages && nextPage != null);
+            } 
+            await getRemaining();
+        }
+
+        let cacheData = {
+            created: Date.now(),
+            characters: characters
+        }
+        let result = await cacheDataInMongo(cacheData)
     } else {
-        const getRemaining = async ()=> {
-            let count = 1
-            let nextPage = next
-            do {
-                  let res = await fetch(nextPage)
-                  let {info: {next}, results} = await res.json();
-                  count ++
-                  characters = characters.concat(results);
-                  nextPage = next
-            }
-            while (count <= pages && nextPage != null);
-        } 
-        await getRemaining();
+        let data = await fetchDataFromMongo()
+        characters = characters.concat(data);
     }
 
     { // block variable
-      const res_favorite = await fetch(`http://localhost:3000/api/character`)
-      let {success, data : favorites} = await res_favorite.json();
-      if (success === "true" || success === true) {
-          for (var ch of characters) {
-              ch.isFavorite = favorites.some(favorite => favorite.id===ch.id)
-          }
-      } 
+          const res_favorite = await fetch(`http://localhost:3000/api/character`)
+          let {success, data : favorites} = await res_favorite.json();
+          if (success === "true" || success === true) {
+              for (var ch of characters) {
+                  //console.log (ch.name)
+                  ch.isFavorite = favorites.some(favorite => favorite.id===ch.id)
+              }
+          } 
     }
 
     { // block variable, and character/1 is for routing purpose, 1 is not an character id here 
@@ -100,7 +119,10 @@ export async function getServerSideProps() {
           }
       }
    } 
+    //characters = JSON.stringify(characters)
+    characters = characters.map(ch=>JSON.stringify(ch))
     return { props: {characters} }
+    //return { props: characters }
 }
 
 export default Characters;
