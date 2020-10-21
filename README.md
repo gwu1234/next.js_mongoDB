@@ -36,3 +36,7 @@ framework:
 4) using Next.js technology, this application is hybrid in terms of SSR (server side rebdering)
 
 and CSR (client side rendering)
+
+## new features at branch cache_db:
+
+original data (of https://rickandmortyapi.com/api/character) is cached at mongoDB of this backend server for quick access. avery a few hours (configurable), the cache is updated by original data
