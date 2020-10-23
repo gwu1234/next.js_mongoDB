@@ -6,6 +6,10 @@ const CharacterSchema = new mongoose.Schema({
         required: [true, 'id required'],
         unique: true
     },
+    cached: {
+        type: Number,
+        required: [true, 'cached required'],
+    },
     name: {
         type: String,
         required: true,
@@ -43,6 +47,10 @@ const CharacterSchema = new mongoose.Schema({
         type: String,
         required: false,
         maxlength: [100, 'image cannot be more than 100 characters']
+    },
+    img: { 
+          data: Buffer, 
+          contentType: String 
     },
     episode: [String],     
     url: {

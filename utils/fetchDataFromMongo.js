@@ -1,15 +1,15 @@
 import Characters from "../models/Characters"
 
 async function fetchDataFromMongo() {
-    console.log ("fetching data at cacheDataInMongo")
+    console.log ("fetching data at fetchDataFromMongo")
     try { 
-          const data = await Characters.find({});
-          return data[0].characters
+          const characters = await Characters.find({});
+          return characters
     } catch (error) {
           console.log(error)
-          return false
+          return []
     }
-    return false 
+    return []
 }
 
 export default fetchDataFromMongo

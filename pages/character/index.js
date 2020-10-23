@@ -2,9 +2,9 @@ import styles from '../../styles/characters.module.css'
 import { Button, Card, Loader, Icon} from 'semantic-ui-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import isDataInMongo from "../../utils/isDataInMongo"
-import cacheDataInMongo from "../../utils/cacheDataInMongo"
-import fetchDataFromMongo from "../../utils/fetchDataFromMongo"
+//import isDataInMongo from "../../utils/isDataInMongo"
+//import cacheDataInMongo from "../../utils/cacheDataInMongo"
+//import fetchDataFromMongo from "../../utils/fetchDataFromMongo"
 
 const Characters = ({characters}) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -30,13 +30,14 @@ const Characters = ({characters}) => {
           <div className={styles.grid}>       
               {characters.map(ch => {
                 ch = JSON.parse(ch)
+                //console.log ("ch id frontend = ", ch.id)
                 let header = ch.id + " : " + ch.name
                 let path = '/character/'+ ch.id;
                 let isFavorite = ch.isFavorite === true || ch.isFavorite === "true"
                 let isDeleted = ch.isDeleted && (ch.isDeleted===true || ch.isDeleted==="true")
                 if (!isDeleted) {
                     return (
-                      <div key={ch.id}>
+                      <div key={header}>
                         <Card>
                           <Card.Content>
                             <Card.Header>
@@ -62,10 +63,11 @@ const Characters = ({characters}) => {
 }
 
 export async function getServerSideProps() {
-    let mongoData = await isDataInMongo()
+    //let mongoData = await isDataInMongo()
     //console.log("mongoData", mongoData)
     let characters = [];
-    if (!mongoData) {
+    //if (!mongoData) {
+    if (true) {
         console.log ("no valid data in mongo DB")
         const res = await fetch(`https://rickandmortyapi.com/api/character`)
         let {info: {pages, next}, results} = await res.json();
@@ -88,16 +90,65 @@ export async function getServerSideProps() {
             } 
             await getRemaining();
         }
+        //console.log ("#0 characters[0].id = ", characters[0].id)
+        //console.log ("numbers of characters = ", characters.length)
+        /*characters =  await Promise.all(characters.map(async (ch) => {
+             try {
+                let response = await fetch(ch.image)
+                let body =  await response.body
+                let data = []
+               
+                var imageData = ()=> { return new Promise(function(resolve, reject) {
+                    let chunks = []
+                    body.on('readable', () => {
+                       let chunk;
+                       while (null !== (chunk = body.read())) {
+                          chunks.push(chunk);
+                       }
+                    });
 
-        let cacheData = {
-            created: Date.now(),
-            characters: characters
-        }
-        let result = await cacheDataInMongo(cacheData)
-    } else {
-        let data = await fetchDataFromMongo()
-        characters = characters.concat(data);
-    }
+                    //body.on('data', (chunk) => {
+                    //    //console.log(`Received ${chunk.length} bytes of data.`);
+                    //    chunks.push(chunk);
+                    //});
+
+                    body.on('end', () => {
+                        data = chunks.join('');
+                        //console.log ("data length = ", data.length)
+                        resolve (true)
+                    });
+                })} 
+                let finished = await imageData()
+
+                //console.log("data length = ", data.length)
+                //console.log("finished = ", finished) 
+                let buff = new Buffer.from(data);
+                let base64data = buff.toString('base64');
+                //console.log("base64data length = ", base64data.length)
+
+                ch.img =  { 
+                   data: base64data, 
+                   contentType: 'image/jpeg'
+                };
+                ch.cached = await Date.now();
+
+                let result = await cacheDataInMongo(ch)
+                //console.log("caching result = ", result)
+            }
+            catch (err) {
+                console.log (err.name)
+                console.log (err.message)
+                ch.img =  { 
+                     data: [], 
+                     contentType: 'image/jpeg'
+                  };
+            };  
+            return ch
+        })) */ 
+    } //else {
+        //let data = await fetchDataFromMongo()
+        //characters = characters.concat(data);
+    //}
 
     { // block variable
           const res_favorite = await fetch(`http://localhost:3000/api/character`)
@@ -109,7 +160,7 @@ export async function getServerSideProps() {
               }
           } 
     }
-
+    //console.log ("#3 characters[0].id = ", characters[0].id)
     { // block variable, and character/1 is for routing purpose, 1 is not an character id here 
       const res_deleted = await fetch(`http://localhost:3000/api/character/1`)
       let {success, data : deleteds} = await res_deleted.json();
@@ -120,9 +171,10 @@ export async function getServerSideProps() {
       }
    } 
     //characters = JSON.stringify(characters)
+    //console.log ("#4 characters[0].id = ", characters[0].id)
     characters = characters.map(ch=>JSON.stringify(ch))
+    //console.log ("characters length = ", characters.length)
     return { props: {characters} }
-    //return { props: characters }
 }
 
 export default Characters;

@@ -54,8 +54,25 @@ const Character = ({ character, favorite, comment }) => {
         }
     }
 
+    
     const createFavorite = async () => {
         try {
+            console.log("at createFavorite()")
+            let imageUrl = character.image
+            let response  = await fetch(imageUrl)
+            let {done, value} = await response.body.getReader().read()
+            let data = []
+            if (done === "false" || done === false) { 
+               data.push(value); 
+               console.log ("result.done = ", done )
+               console.log ("image buffer length=", value.length) 
+            }
+
+            character.img =  { 
+                data: data, 
+                contentType: 'image/jpeg'
+            };
+
             const res = await fetch('http://localhost:3000/api/character', {
                 method: 'POST',
                 headers: {
@@ -66,7 +83,8 @@ const Character = ({ character, favorite, comment }) => {
             })
             router.push("/favorite");
         } catch (error) {
-            console.log(error);
+            console.log(error.name);
+            console.log(error.message)
         }
     }
 
