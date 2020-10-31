@@ -1,9 +1,9 @@
-import Characters from "../models/Characters"
+import Character from "../models/Character"
 
 async function fetchDataFromMongo() {
     console.log ("fetching data at fetchDataFromMongo")
     try { 
-          const characters = await Characters.find({});
+          const characters = await Character.find({});
           return characters
     } catch (error) {
           console.log(error)

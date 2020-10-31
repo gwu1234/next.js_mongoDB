@@ -2,12 +2,16 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Confirm, Button, Loader, Icon } from 'semantic-ui-react';
 import styles from '../../../styles/character.module.css'
+import ModelFavorite from '../../../models/Character';
+import ModelComment from '../../../models/Comment';
+import mongoConnect from '../../../utils/mongoConnect';
 
 const Character = ({ character, favorite, comment }) => {
     const {origin, location, episode, image, url, created} = character;
     const [confirm, setConfirm] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const router = useRouter();
+    comment = JSON.parse(comment)
 
     if (favorite ===true || favorite ==="true") {
         favorite = true;
@@ -21,6 +25,7 @@ const Character = ({ character, favorite, comment }) => {
     }
 
     const openFavorite = () => {
+        console.log("openFavorite")
         setConfirm(true);
     }
 
@@ -58,20 +63,20 @@ const Character = ({ character, favorite, comment }) => {
     const createFavorite = async () => {
         try {
             console.log("at createFavorite()")
-            let imageUrl = character.image
-            let response  = await fetch(imageUrl)
-            let {done, value} = await response.body.getReader().read()
-            let data = []
-            if (done === "false" || done === false) { 
-               data.push(value); 
-               console.log ("result.done = ", done )
-               console.log ("image buffer length=", value.length) 
-            }
+            //let imageUrl = character.image
+            //let response  = await fetch(imageUrl)
+            //let {done, value} = await response.body.getReader().read()
+            //let data = []
+            //if (done === "false" || done === false) { 
+            //   data.push(value); 
+            //   console.log ("result.done = ", done )
+            //   console.log ("image buffer length=", value.length) 
+            //}
 
-            character.img =  { 
-                data: data, 
-                contentType: 'image/jpeg'
-            };
+            //character.img =  { 
+            //    data: data, 
+            //    contentType: 'image/jpeg'
+            //};
 
             const res = await fetch('http://localhost:3000/api/character', {
                 method: 'POST',
@@ -83,6 +88,7 @@ const Character = ({ character, favorite, comment }) => {
             })
             router.push("/favorite");
         } catch (error) {
+            console.log ("error in creating favorite")
             console.log(error.name);
             console.log(error.message)
         }
@@ -112,6 +118,7 @@ const Character = ({ character, favorite, comment }) => {
     }
 
     const handleFavorite = async () => {
+        console.log("handleFavorite()")
         if (favorite) { 
             removeFavorite();
             close();
@@ -215,16 +222,46 @@ const Character = ({ character, favorite, comment }) => {
 }
 
 export async function getServerSideProps({ query: { id, favorite} }) {
-    const res = await fetch(`https://rickandmortyapi.com/api/character/${id}`)
-    let character = await res.json();
-    
-    const res_comment = await fetch(`http://localhost:3000/api/character/${id}/comment`)
-    let {success, data : comments} = await res_comment.json();
+    let character =[]
     let comment = null
-    if (success === "true" || success === true) {
-         comment = comments.filter(com => com.id===parseInt(id))[0] || null
-    } 
-    return { props: {character, favorite, comment} }    
+    mongoConnect ()
+    try {
+        const res = await fetch(`https://rickandmortyapi.com/api/character/${id}`)
+        character = await res.json();
+        //return { props: {character, favorite, comment: null} } 
+    }
+    catch (err) {
+        console.log("character/id/index.js")
+        console.log (err.name)
+        //return { props: {character: [], favorite, comment: null} } 
+     }
+
+    try {
+        console.log ("fetching Comments")
+        //let comment = null
+        let comments = await ModelComment.find({});
+        if (comments && comments.length > 0) {
+            comment = comments.filter(com => com.id===parseInt(id))[0] || null
+        }
+        //return { props: {character, favorite, comment} } 
+    } catch (err) {
+          console.log("character/id/index.js fetching comments")
+          console.log(err.name)
+          //return { props: {character, favorite, comment: null} } 
+    }  
+        /*const res_comment = await fetch(`http://localhost:3000/api/character/${id}/comment`)
+        let {success, data : comments} = await res_comment.json();
+        comment = null
+        if (success === "true" || success === true) {
+            comment = comments.filter(com => com.id===parseInt(id))[0] || null
+        } 
+        return { props: {character, favorite, comment} } 
+    }  catch (err) {
+           console.log("character/id/index.js")
+           console.log (err.name)
+        return { props: {character, favorite, comment} } 
+    }*/
+    return { props: {character, favorite, comment: JSON.stringify(comment)} }     
 }
 
 export default Character;

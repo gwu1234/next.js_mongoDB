@@ -2,9 +2,14 @@ import styles from '../../styles/characters.module.css'
 import { Button, Card, Loader, Icon} from 'semantic-ui-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import ModelFavorite from '../../models/Character';
+import ModelDeleted from '../../models/Deleted';
+import mongoConnect from '../../utils/mongoConnect';
+
 //import isDataInMongo from "../../utils/isDataInMongo"
 //import cacheDataInMongo from "../../utils/cacheDataInMongo"
 //import fetchDataFromMongo from "../../utils/fetchDataFromMongo"
+
 
 const Characters = ({characters}) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -90,90 +95,35 @@ export async function getServerSideProps() {
             } 
             await getRemaining();
         }
-        //console.log ("#0 characters[0].id = ", characters[0].id)
-        //console.log ("numbers of characters = ", characters.length)
-        /*characters =  await Promise.all(characters.map(async (ch) => {
-             try {
-                let response = await fetch(ch.image)
-                let body =  await response.body
-                let data = []
-               
-                var imageData = ()=> { return new Promise(function(resolve, reject) {
-                    let chunks = []
-                    body.on('readable', () => {
-                       let chunk;
-                       while (null !== (chunk = body.read())) {
-                          chunks.push(chunk);
-                       }
-                    });
-
-                    //body.on('data', (chunk) => {
-                    //    //console.log(`Received ${chunk.length} bytes of data.`);
-                    //    chunks.push(chunk);
-                    //});
-
-                    body.on('end', () => {
-                        data = chunks.join('');
-                        //console.log ("data length = ", data.length)
-                        resolve (true)
-                    });
-                })} 
-                let finished = await imageData()
-
-                //console.log("data length = ", data.length)
-                //console.log("finished = ", finished) 
-                let buff = new Buffer.from(data);
-                let base64data = buff.toString('base64');
-                //console.log("base64data length = ", base64data.length)
-
-                ch.img =  { 
-                   data: base64data, 
-                   contentType: 'image/jpeg'
-                };
-                ch.cached = await Date.now();
-
-                let result = await cacheDataInMongo(ch)
-                //console.log("caching result = ", result)
-            }
-            catch (err) {
-                console.log (err.name)
-                console.log (err.message)
-                ch.img =  { 
-                     data: [], 
-                     contentType: 'image/jpeg'
-                  };
-            };  
-            return ch
-        })) */ 
-    } //else {
-        //let data = await fetchDataFromMongo()
-        //characters = characters.concat(data);
-    //}
-
+    } 
     { // block variable
-          const res_favorite = await fetch(`http://localhost:3000/api/character`)
-          let {success, data : favorites} = await res_favorite.json();
-          if (success === "true" || success === true) {
+          mongoConnect
+          try {
+              //console.log ("fetching favorites")
+              let favorites = await ModelFavorite.find({});
               for (var ch of characters) {
-                  //console.log (ch.name)
                   ch.isFavorite = favorites.some(favorite => favorite.id===ch.id)
               }
-          } 
-    }
-    //console.log ("#3 characters[0].id = ", characters[0].id)
-    { // block variable, and character/1 is for routing purpose, 1 is not an character id here 
-      const res_deleted = await fetch(`http://localhost:3000/api/character/1`)
-      let {success, data : deleteds} = await res_deleted.json();
-      if (success === "true" || success === true) {
-          for (var ch of characters) {
-             ch.isDeleted = deleteds.some(deleted => deleted.id===ch.id)
+          } catch (err) {
+              console.log("error handler character/index.js favorites")
+              console.log (err.message)
           }
+    }
+    { // block variable, and character/1 is for routing purpose, 1 is not an character id here 
+      try {
+          //console.log ("fetching Deleted Characters")
+          let deleteds = await ModelDeleted.find({});
+          if (deleteds && deleteds.length > 0) {
+              for (var ch of characters) {
+                 ch.isDeleted = deleteds.some(deleted => deleted.id===ch.id)
+              }
+          }
+      } catch (err) {
+          console.log("character/index.js fetching deleted")
+          console.log(err.name)
       }
    } 
-    //characters = JSON.stringify(characters)
-    //console.log ("#4 characters[0].id = ", characters[0].id)
     characters = characters.map(ch=>JSON.stringify(ch))
-    //console.log ("characters length = ", characters.length)
     return { props: {characters} }
 }
 

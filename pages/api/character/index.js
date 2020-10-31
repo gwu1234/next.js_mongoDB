@@ -5,11 +5,17 @@ mongoConnect();
 
 export default async (req, res) => {
     const { method } = req;
-
+    console.log("api/character method: ", method)
     switch (method) {
         case 'GET':
+        console.log("api/character GET: ")
             try {
-                const character = await Character.find({});
+                //const character = await Character.find({ $type : "object" });
+                //findOne({}
+                const character = await Character.findOne({});
+                console.log("api GET response : ")
+                console.log(response)
+                //character = character || []
                 res.status(200).json({ success: true, data: character })
             } catch (error) {
                 res.status(400).json({ success: false });

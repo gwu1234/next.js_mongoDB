@@ -1,8 +1,9 @@
 import styles from '../styles/characters.module.css'
 import { Button, Card, Loader} from 'semantic-ui-react';
-//import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import ModelCharacter from '../models/Character';
+import mongoConnect from '../utils/mongoConnect';
 
 const Favorites = ({characters}) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -27,6 +28,7 @@ const Favorites = ({characters}) => {
           </h3>
           <div className={styles.grid}>       
               {characters.map(ch => {
+                ch = JSON.parse(ch)
                 let header = ch.id + " : " + ch.name
                 let path = '/character/'+ ch.id;
                 return (
@@ -55,13 +57,17 @@ const Favorites = ({characters}) => {
 }
 
 export async function getServerSideProps() {
-    const res = await fetch(`http://localhost:3000/api/character`)
-    let {success, data} = await res.json();
-    
-    if (success === "true" || success === true) {
-        return { props: {characters: data} }
-    } 
-    return { props: {characters: []} }
+    mongoConnect();
+    try {
+        console.log ("favorite.js fetching favorites")
+        let characters = await ModelCharacter.find({}).exec();
+        characters = characters.map (ch => JSON.stringify (ch))
+        return { props: {characters: characters} }
+    } catch (err) {
+        console.log("error at favorite.js")
+        console.log (err.message)
+        return { props: {characters: []} }
+    }
 }
 
 export default Favorites;

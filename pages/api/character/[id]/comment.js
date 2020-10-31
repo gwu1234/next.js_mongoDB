@@ -9,8 +9,8 @@ export default async (req, res) => {
         method
     } = req;
 
-    //console.log ("id at api = ", id);
-    //console.log ("method = ", method);
+    console.log ("id at api/comment.js = ", id);
+    console.log ("method = ", method);
     
     switch (method) {
         case 'GET':

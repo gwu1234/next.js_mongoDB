@@ -5,7 +5,8 @@ mongoConnect();
 
 export default async (req, res) => {
     const { method } = req;
-
+    console.log("api/character/id")
+    console.log("method = ", method)
     switch (method) {
         case 'GET':
             try {
