@@ -228,39 +228,22 @@ export async function getServerSideProps({ query: { id, favorite} }) {
     try {
         const res = await fetch(`https://rickandmortyapi.com/api/character/${id}`)
         character = await res.json();
-        //return { props: {character, favorite, comment: null} } 
     }
     catch (err) {
         console.log("character/id/index.js")
         console.log (err.name)
-        //return { props: {character: [], favorite, comment: null} } 
      }
 
     try {
         console.log ("fetching Comments")
-        //let comment = null
         let comments = await ModelComment.find({});
         if (comments && comments.length > 0) {
             comment = comments.filter(com => com.id===parseInt(id))[0] || null
         }
-        //return { props: {character, favorite, comment} } 
     } catch (err) {
           console.log("character/id/index.js fetching comments")
           console.log(err.name)
-          //return { props: {character, favorite, comment: null} } 
     }  
-        /*const res_comment = await fetch(`http://localhost:3000/api/character/${id}/comment`)
-        let {success, data : comments} = await res_comment.json();
-        comment = null
-        if (success === "true" || success === true) {
-            comment = comments.filter(com => com.id===parseInt(id))[0] || null
-        } 
-        return { props: {character, favorite, comment} } 
-    }  catch (err) {
-           console.log("character/id/index.js")
-           console.log (err.name)
-        return { props: {character, favorite, comment} } 
-    }*/
     return { props: {character, favorite, comment: JSON.stringify(comment)} }     
 }
 

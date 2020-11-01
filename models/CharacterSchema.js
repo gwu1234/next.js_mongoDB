@@ -54,7 +54,11 @@ const CharacterSchema = new mongoose.Schema({
         type: String,
         required: false,
         maxlength: [100, 'name cannot be more than 100 characters']
-    }
+    },
+    cached: {
+        type: Number,
+        required: [true, 'cached not required'],
+    },
 })
 
 export default CharacterSchema

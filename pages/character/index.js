@@ -4,11 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import ModelFavorite from '../../models/Character';
 import ModelDeleted from '../../models/Deleted';
+import ModelCharacters from '../../models/Characters';
 import mongoConnect from '../../utils/mongoConnect';
-
-//import isDataInMongo from "../../utils/isDataInMongo"
-//import cacheDataInMongo from "../../utils/cacheDataInMongo"
-//import fetchDataFromMongo from "../../utils/fetchDataFromMongo"
+import isDataInMongo from "../../utils/isDataInMongo"
+import cacheDataInMongo from "../../utils/cacheDataInMongo"
 
 
 const Characters = ({characters}) => {
@@ -35,7 +34,6 @@ const Characters = ({characters}) => {
           <div className={styles.grid}>       
               {characters.map(ch => {
                 ch = JSON.parse(ch)
-                //console.log ("ch id frontend = ", ch.id)
                 let header = ch.id + " : " + ch.name
                 let path = '/character/'+ ch.id;
                 let isFavorite = ch.isFavorite === true || ch.isFavorite === "true"
@@ -68,11 +66,9 @@ const Characters = ({characters}) => {
 }
 
 export async function getServerSideProps() {
-    //let mongoData = await isDataInMongo()
-    //console.log("mongoData", mongoData)
+    let mongoData = await isDataInMongo()
     let characters = [];
-    //if (!mongoData) {
-    if (true) {
+    if (!mongoData) {
         console.log ("no valid data in mongo DB")
         const res = await fetch(`https://rickandmortyapi.com/api/character`)
         let {info: {pages, next}, results} = await res.json();
@@ -95,14 +91,40 @@ export async function getServerSideProps() {
             } 
             await getRemaining();
         }
-    } 
+        
+        try {
+            await Promise.all(characters.map(async (ch) => {
+                try {
+                    ch.cached = Date.now() 
+                    cacheDataInMongo(ch) 
+                } catch (err) {
+                  console.log (`caching failed for character id ${ch.id}`)
+                }
+            }))
+        } catch (err) {
+           console.log("error in promise all ")
+           console.log (err)
+        }
+    } else {
+        console.log ("cached characters existed")
+        try {
+            mongoConnect
+            let ch = await ModelCharacters.find({}).lean();
+            characters = characters.concat(ch)
+            console.log("fetchDataFromMongo return character length", ch.length)
+        } catch (err) {
+            console.log("fetchDataFromMongo failed")
+            console.log(err)
+            return { props: {characters:[]} }
+        }
+    }
     { // block variable
           mongoConnect
           try {
               //console.log ("fetching favorites")
               let favorites = await ModelFavorite.find({});
               for (var ch of characters) {
-                  ch.isFavorite = favorites.some(favorite => favorite.id===ch.id)
+                    ch['isFavorite'] = favorites.some(favorite => favorite.id===ch.id)
               }
           } catch (err) {
               console.log("error handler character/index.js favorites")
@@ -115,7 +137,7 @@ export async function getServerSideProps() {
           let deleteds = await ModelDeleted.find({});
           if (deleteds && deleteds.length > 0) {
               for (var ch of characters) {
-                 ch.isDeleted = deleteds.some(deleted => deleted.id===ch.id)
+                   ch.isDeleted = deleteds.some(deleted => deleted.id===ch.id)
               }
           }
       } catch (err) {
@@ -123,6 +145,7 @@ export async function getServerSideProps() {
           console.log(err.name)
       }
    } 
+   
     characters = characters.map(ch=>JSON.stringify(ch))
     return { props: {characters} }
 }
