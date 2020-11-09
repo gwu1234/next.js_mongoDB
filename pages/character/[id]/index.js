@@ -14,6 +14,7 @@ const Character = ({ character, fromCache, favorite, comment }) => {
     const [isDeleting, setIsDeleting] = useState(false);
     const router = useRouter();
     comment = JSON.parse(comment)
+    console.log("fromCache = ", fromCache)
 
     if (favorite ===true || favorite ==="true") {
         favorite = true;
@@ -61,7 +62,28 @@ const Character = ({ character, fromCache, favorite, comment }) => {
         }
     }
 
-    
+    const fetchImage = async () => {
+        try {
+            const imageName = (/\d{1,}.jpeg$/).exec(character.image)[0]
+            const url = `http://localhost:3000/api/character/${character.id}/image?name=${imageName}`
+            image = await fetch(url, {
+                method: "GET",
+                headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                }
+            });
+            return image
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    if (fromCache ) {
+          console.log("fetchingImage ")
+          fetchImage();
+    }
+
     const createFavorite = async () => {
         try {
             console.log("at createFavorite()")
