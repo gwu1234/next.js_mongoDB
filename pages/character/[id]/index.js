@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Confirm, Button, Loader, Icon } from 'semantic-ui-react';
 import styles from '../../../styles/character.module.css'
-import ModelFavorite from '../../../models/Character';
 import ModelComment from '../../../models/Comment';
 import mongoConnect from '../../../utils/mongoConnect';
+//import FileSaver from 'file-saver'
 
-const Character = ({ character, favorite, comment }) => {
-    const {origin, location, episode, image, url, created} = character;
+const Character = ({ character, fromCache, favorite, comment }) => {
+    //console.log ("character/[id]/index.js")
+    let {origin, location, episode, image, url, created} = character;
+    console.log ("fromCache = ", fromCache)
     const [confirm, setConfirm] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const router = useRouter();
@@ -63,21 +65,6 @@ const Character = ({ character, favorite, comment }) => {
     const createFavorite = async () => {
         try {
             console.log("at createFavorite()")
-            //let imageUrl = character.image
-            //let response  = await fetch(imageUrl)
-            //let {done, value} = await response.body.getReader().read()
-            //let data = []
-            //if (done === "false" || done === false) { 
-            //   data.push(value); 
-            //   console.log ("result.done = ", done )
-            //   console.log ("image buffer length=", value.length) 
-            //}
-
-            //character.img =  { 
-            //    data: data, 
-            //    contentType: 'image/jpeg'
-            //};
-
             const res = await fetch('http://localhost:3000/api/character', {
                 method: 'POST',
                 headers: {
@@ -127,6 +114,22 @@ const Character = ({ character, favorite, comment }) => {
             close();
         }
     }
+
+    /*const imageDownload = async () => {
+        console.log(`imageDownload downloading from ${image}`)
+        var rx = /\d{1,}.jpeg$/;
+        var filename = rx.exec(image);
+        console.log(filename); 
+        try {
+            const res = await fetch(image);
+            const blob = await res.blob();
+            // console.log (res)
+            // console.log (blob)
+            FileSaver.saveAs(blob, filename)
+        } catch (err){
+            console.log (err)
+        }
+    }*/
 
     return (
         <div className={styles.container}>
@@ -206,6 +209,7 @@ const Character = ({ character, favorite, comment }) => {
                     {favorite ? <Button color='green' onClick={unFavorite}>UnFavor</Button>
                               : <Button color='green' onClick={openFavorite}>Favorite</Button>
                     }
+                    {/*<Button color='blue' onClick={imageDownload}>Download</Button>*/}
                 </>
             }
             <Confirm
@@ -221,21 +225,12 @@ const Character = ({ character, favorite, comment }) => {
     )
 }
 
-export async function getServerSideProps({ query: { id, favorite} }) {
-    let character =[]
+export async function getServerSideProps({ query: {character, id, fromCache, favorite} }) {
+    character = JSON.parse(character)
     let comment = null
-    mongoConnect ()
-    try {
-        const res = await fetch(`https://rickandmortyapi.com/api/character/${id}`)
-        character = await res.json();
-    }
-    catch (err) {
-        console.log("character/id/index.js")
-        console.log (err.name)
-     }
 
     try {
-        console.log ("fetching Comments")
+        //console.log ("fetching Comments")
         let comments = await ModelComment.find({});
         if (comments && comments.length > 0) {
             comment = comments.filter(com => com.id===parseInt(id))[0] || null
@@ -244,7 +239,7 @@ export async function getServerSideProps({ query: { id, favorite} }) {
           console.log("character/id/index.js fetching comments")
           console.log(err.name)
     }  
-    return { props: {character, favorite, comment: JSON.stringify(comment)} }     
+    return { props: {character, fromCache, favorite, comment: JSON.stringify(comment)} }     
 }
 
 export default Character;

@@ -8,6 +8,7 @@ import ModelCharacters from '../../models/Characters';
 import mongoConnect from '../../utils/mongoConnect';
 import isDataInMongo from "../../utils/isDataInMongo"
 import cacheDataInMongo from "../../utils/cacheDataInMongo"
+import cacheImageInMongo from "../../utils/cacheImageInMongo"
 
 
 const Characters = ({characters}) => {
@@ -38,6 +39,7 @@ const Characters = ({characters}) => {
                 let path = '/character/'+ ch.id;
                 let isFavorite = ch.isFavorite === true || ch.isFavorite === "true"
                 let isDeleted = ch.isDeleted && (ch.isDeleted===true || ch.isDeleted==="true")
+                //console.log (ch)
                 if (!isDeleted) {
                     return (
                       <div key={header}>
@@ -50,7 +52,7 @@ const Characters = ({characters}) => {
                           <Card.Content extra>
                             <Button primary onClick ={()=>router.push({
                                 pathname: path,
-                                query: { favorite: isFavorite }
+                                query: { character: JSON.stringify(ch), fromCache: ch.fromCache, favorite: isFavorite }
                               })}>View</Button>
                             {isFavorite  && <Icon name='favorite' color="red" size="large"></Icon>}
                           </Card.Content>
@@ -105,15 +107,27 @@ export async function getServerSideProps() {
            console.log("error in promise all ")
            console.log (err)
         }
+
+        try {
+            characters.map(async (ch) => {
+              cacheImageInMongo(ch.image)  
+            })
+         } catch (err) {
+            console.log("error in catching images ")
+            console.log (err)
+         }
+
+
     } else {
         console.log ("cached characters existed")
         try {
             mongoConnect
             let ch = await ModelCharacters.find({}).lean();
             characters = characters.concat(ch)
-            console.log("fetchDataFromMongo return character length", ch.length)
+            //console.log("fetchDataFromMongo return character length", ch.length)
+            characters = characters.map (c => {c.fromCache = true; return c })
         } catch (err) {
-            console.log("fetchDataFromMongo failed")
+            //console.log("fetchDataFromMongo failed")
             console.log(err)
             return { props: {characters:[]} }
         }
@@ -124,10 +138,10 @@ export async function getServerSideProps() {
               //console.log ("fetching favorites")
               let favorites = await ModelFavorite.find({});
               for (var ch of characters) {
-                    ch['isFavorite'] = favorites.some(favorite => favorite.id===ch.id)
+                    ch.isFavorite = favorites.some(favorite => favorite.id===ch.id)
               }
           } catch (err) {
-              console.log("error handler character/index.js favorites")
+              //console.log("error handler character/index.js favorites")
               console.log (err.message)
           }
     }
@@ -141,7 +155,7 @@ export async function getServerSideProps() {
               }
           }
       } catch (err) {
-          console.log("character/index.js fetching deleted")
+          //console.log("character/index.js fetching deleted")
           console.log(err.name)
       }
    } 
