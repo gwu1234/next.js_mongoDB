@@ -8,13 +8,15 @@ import mongoConnect from '../../../utils/mongoConnect';
 
 const Character = ({ character, fromCache, favorite, comment }) => {
     //console.log ("character/[id]/index.js")
-    let {origin, location, episode, image, url, created} = character;
+    let {origin, location, episode, url, created} = character;
     console.log ("fromCache = ", fromCache)
     const [confirm, setConfirm] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [image, setImage] = useState(null);
     const router = useRouter();
     comment = JSON.parse(comment)
     console.log("fromCache = ", fromCache)
+    //let image = null
 
     if (favorite ===true || favorite ==="true") {
         favorite = true;
@@ -62,26 +64,42 @@ const Character = ({ character, fromCache, favorite, comment }) => {
         }
     }
 
+    const bufferToBase64=(buffer)=> {
+        var binary = '';
+        var bytes = [].slice.call(new Uint8Array(buffer));
+        bytes.forEach((b) => binary += String.fromCharCode(b));
+        return btoa(binary);
+    };
+
     const fetchImage = async () => {
+        console.log ("fetchImage()")
         try {
             const imageName = (/\d{1,}.jpeg$/).exec(character.image)[0]
             const url = `http://localhost:3000/api/character/${character.id}/image?name=${imageName}`
-            image = await fetch(url, {
+            let res = await fetch(url, {
                 method: "GET",
                 headers: {
                     "Accept": "application/json",
                     "Content-Type": "application/json"
                 }
             });
-            return image
+            let data = await res.json()
+            //console.log ("getting data")
+            //console.log (data.success)
+            var base64Flag = 'data:image/jpeg;base64,';
+            var imageStr = bufferToBase64(data.data.img.data.data);
+            setImage(base64Flag+imageStr)
+
         } catch (error) {
             console.log(error)
         }
     }
 
     if (fromCache ) {
-          console.log("fetchingImage ")
-          fetchImage();
+        console.log("fetchingImage ")
+        fetchImage()
+    } else {
+        setImage(character.image)
     }
 
     const createFavorite = async () => {

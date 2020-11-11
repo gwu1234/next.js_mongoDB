@@ -18,7 +18,7 @@ export default async (req, res) => {
                     console.log("image at GET found")
                     //return res.status(400).json({ success: false });
                 }
-                res.status(200).json({ success: true, data: null });
+                res.status(200).json({ success: true, data: image });
             } catch (error) {
                 console.log(error)
                 res.status(400).json({ success: false });
