@@ -39,4 +39,9 @@ and CSR (client side rendering)
 
 ## new features at branch cache_db:
 
-original data (of https://rickandmortyapi.com/api/character) is cached at mongoDB of this backend server for quick access. avery a few hours (configurable), the cache is updated by original data
+original data except images (of https://rickandmortyapi.com/api/character) is cached at mongoDB of this backend server for quick access. avery a few hours (configurable), the cache is updated by original data
+
+## branch imageDownload :
+
+images is downloaded from https://rickandmortyapi.com/api/character and cached at mongoDB as well
+
